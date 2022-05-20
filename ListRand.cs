@@ -16,11 +16,26 @@ namespace ListSerialize
             using (BinaryWriter writer = new BinaryWriter(s, Encoding.UTF8, false))
             {
                 ListNode temp = Head;
+                Dictionary<ListNode, int> nodes = new Dictionary<ListNode, int>();
+
+                for (int i = 0; i < Count; i++)
+                {
+                    nodes.Add(temp, i);
+                    temp = temp.Next;
+                }
+
+                temp = Head;
                 writer.Write(Count);
+
                 for (int i = 0; i < Count; i++)
                 {
                     writer.Write(temp.Data);
-                    writer.Write(GetNodeId(temp.Rand));
+                    
+                    if (temp.Rand == null)
+                        writer.Write(-1);
+                    else
+                        writer.Write(nodes[temp.Rand]);
+                    
                     temp = temp.Next;
                 }
             }
@@ -28,96 +43,44 @@ namespace ListSerialize
 
         public void Deserialize(Stream s)
         {
-            List<int> list = new List<int>();
-            
             using (BinaryReader reader = new BinaryReader(s, Encoding.UTF8, false))
             {
-                for (int i = 0, u = reader.ReadInt32(); i < u; i++)
+                int j = reader.ReadInt32();
+                int[] randId = new int[j];
+
+                Dictionary<int, ListNode> nodes = new Dictionary<int, ListNode>();
+
+                for (int i = 0; i < j; i++)
                 {
-                    PushBack(reader.ReadString());
-                    list.Add(reader.ReadInt32());
+                    nodes.Add(i, PushBack(reader.ReadString()));
+                    randId[i] = reader.ReadInt32();
+                }
+
+                ListNode temp = Head;
+                for (int i = 0; i < j; i++)
+                {
+                    if (randId[i] == -1)
+                        temp.Rand = null;
+                    else
+                        temp.Rand = nodes[randId[i]];
+                    temp = temp.Next;
                 }
             }
-            ListNode temp = Head;
-            foreach (int i in list)
-            {
-                temp.Rand = GetNodeById(i);
-                temp = temp.Next;
-            }
         }
 
-        public void PushFront(string data = "")
+        public ListNode PushBack(string data = "")
         {
             if (Count == 0)
             {
-                Head = Tail = new ListNode(data);
+                Count++;
+                return Head = Tail = new ListNode(data);
             }
             else
             {
-                ListNode temp = new ListNode(null, Head, null, data);
-                Head.Prev = temp;
-                Head = temp;
-            }
-
-            Count++;
-        }
-
-        public void PushBack(string data = "")
-        {
-            if (Count == 0)
-            {
-                Head = Tail = new ListNode(data);
-            }
-            else
-            {
+                Count++;
                 ListNode temp = new ListNode(Tail, null, null, data);
                 Tail.Next = temp;
                 Tail = temp;
-            }
-
-            Count++;
-        }
-
-        public int GetNodeId(ListNode node)
-        {
-            int id = 0;
-            ListNode temp = Head;
-            while (id < Count)
-            {
-                if (temp != node)
-                    temp = temp.Next;
-                else
-                    return id;
-                id++;
-            }
-            return -1;
-        }
-
-        public ListNode GetNodeById(int id)
-        {
-            if (id > Count || id == -1)
-                return null;
-
-            if (id > Count / 2)
-            {
-                int i = Count - 1;
-                ListNode temp = Tail;
-                 while (i > id)
-                {
-                    temp = temp.Prev;
-                    i--;
-                }
-                return temp;
-            }
-            else
-            {
-                int i = 0;
-                ListNode temp = Head;
-                while (i < id)
-                {
-                    temp = temp.Next;
-                    i++;
-                }
                 return temp;
             }
         }
@@ -146,6 +109,35 @@ namespace ListSerialize
                 }
 
                 temp = temp.Next;
+            }
+        }
+
+        public ListNode GetNodeById(int id)
+        {
+            if (id > Count || id < 0)
+                return null;
+
+            if (id > Count / 2)
+            {
+                int i = Count - 1;
+                ListNode temp = Tail;
+                while (i > id)
+                {
+                    temp = temp.Prev;
+                    i--;
+                }
+                return temp;
+            }
+            else
+            {
+                int i = 0;
+                ListNode temp = Head;
+                while (i < id)
+                {
+                    temp = temp.Next;
+                    i++;
+                }
+                return temp;
             }
         }
     }

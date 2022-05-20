@@ -9,13 +9,11 @@ namespace ListSerialize
         {
             ListRand list = new ListRand();
 
-            list.PushFront("Tail");
-
-            list.PushFront("oof1");
-            list.PushFront("oof2");
-            list.PushFront("oof3");
-
-            list.PushFront("Head");
+            list.PushBack("first"); //Head
+            list.PushBack("second");
+            list.PushBack("third");
+            list.PushBack("fourth");
+            list.PushBack("fifth"); //Tail
 
             list.AddRandom();
 
@@ -23,18 +21,13 @@ namespace ListSerialize
 
             list.Serialize(s);
 
-            Console.WriteLine(list.GetNodeId(list.Tail.Prev));
-
-            Console.WriteLine(list.GetNodeById(0).Data);
-
-            Console.WriteLine("End;");
             list.ClearList();
 
             s = new FileStream("/repos/ListSerialize/out", FileMode.Open);
             
             list.Deserialize(s);
 
-            Console.WriteLine("End again");
+            Console.WriteLine("End.");
 
         }
     }
